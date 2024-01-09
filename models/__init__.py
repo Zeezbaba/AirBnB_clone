@@ -1,0 +1,5 @@
+#!/usr/bin/python3
+"""The magic file"""
+from models.engine.file_storage.py import FileStorage
+storage = FileStorage()
+storage.reload()
