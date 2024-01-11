@@ -2,6 +2,8 @@
 '''Command interpreter'''
 import cmd
 from models.engine.file_storage import FileStorage
+from models.base_model import BaseModel
+import json
 
 class HBNBCommand(cmd.Cmd):
     '''Command interpreter entry point'''
