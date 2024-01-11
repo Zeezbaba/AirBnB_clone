@@ -1,8 +1,11 @@
 #!/usr/bin/python3
 '''Command interpreter'''
 import cmd
+from models.base_model import BaseModel
+from models.engine.file_storage import FileStorage
 
 
+# #TODO: print string representations of output instead of dict repr
 class HBNBCommand(cmd.Cmd):
     '''Command interpreter entry point'''
     prompt = '(hbnb) '
@@ -21,8 +24,13 @@ class HBNBCommand(cmd.Cmd):
     def do_create(self, line):
         '''Creates a new BaseModel instance'''
         args = line.split()
-        # #TODO: import BaseModel and use it to create
-        # a new instance based on the provided args
+        if len(args) < 1:
+            print('** class name missing **')
+        elif args[0] != 'BaseModel':
+            print('** class doesn\'t exist **')
+        else:
+            model = BaseModel()
+            model.save()
 
     def help_create(self):
         '''Help for the create command'''
@@ -34,8 +42,20 @@ class HBNBCommand(cmd.Cmd):
     def do_show(self, line):
         '''Prints the string representation of an instance
           based on class name and id'''
-        # #TODO:import Base model
-        return
+        args = line.split()
+        if len(args) < 1:
+            print('** class name missing **')
+        elif args[0] != 'BaseModel':
+            print('** class doesn\'t exist **')
+        elif len(args) < 2:
+            print('** instance id missing **')
+        else:
+            key = args[0]+'.'+args[1]
+            model = FileStorage.all(self).get(key)
+            if model is None:
+                print('** no instance found **')
+                return
+            print(model)
 
     def help_show(self):
         '''Help for the show command'''
@@ -46,7 +66,23 @@ class HBNBCommand(cmd.Cmd):
 
     def do_destroy(self, line):
         '''Deletes an instance based on the class name id'''
-        return
+        args = line.split()
+        if len(args) < 1:
+            print('** class name missing **')
+            return
+        elif args[0] != 'BaseModel':
+            print('** class doesn\'t exist **')
+        elif len(args) < 2:
+            print('** instance id missing **')
+        else:
+            key = args[0]+'.'+args[1]
+            models = FileStorage.all(self)
+            model = models.get(key)
+            if model is None:
+                print('** no instance found **')
+                return
+            del models[key]
+            FileStorage.save(self)
 
     def help_destroy(self):
         '''Help for the destroy command'''
@@ -58,7 +94,17 @@ class HBNBCommand(cmd.Cmd):
     def do_all(self, line):
         '''prints all string representation of all instances
           based based/not on the class name'''
-        return
+        args = line.split()
+        if len(args) == 1:
+            if args[0] != 'BaseModel':
+                print('** class doesn\'t exist **')
+            else:
+                # #TODO: get models based on provided args[0]
+                # print the models to STDOUT
+                print('Some specific model')
+        else:
+            models = FileStorage.all(self)
+            print(models)
 
     def help_all(self):
         '''Help for the all command'''
@@ -70,7 +116,8 @@ class HBNBCommand(cmd.Cmd):
     def do_update(self, line):
         '''updates all instances based in the calss name
           and id by adding or updating attributes'''
-        return
+        args = line.split()
+        # #TODO: update this to update model instances
 
     def help_update(self):
         '''Help for the update command'''
@@ -88,6 +135,7 @@ class HBNBCommand(cmd.Cmd):
         print('\n'.join([
             'Quit the shell',
         ]))
+
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
