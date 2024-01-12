@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 '''Command interpreter'''
 import cmd
-from models.engine.file_storage import FileStorage
+from models import storage
 from models.base_model import BaseModel
 import json
+import re
 
 class HBNBCommand(cmd.Cmd):
     '''Command interpreter entry point'''
@@ -12,18 +13,18 @@ class HBNBCommand(cmd.Cmd):
     def get_model_classes(self):
         '''Gets all available models in the filestorage'''
         model_classes = []
-        for key in FileStorage.classes(self).keys():
+        for key in storage.classes(self).keys():
             model_classes.append(key)
         return model_classes
 
     def get_model(self, arg):
         '''Gets model Based on command argument given'''
-        model = FileStorage.classes(self).get(arg)
+        model = storage.classes(self).get(arg)
         return model
 
     def get_model_attrs(self, arg):
         '''Returns the model attributes of model arg'''
-        attributes = FileStorage.attributes.get(arg)
+        attributes = storage.attributes.get(arg)
         return attributes
 
     def do_quit(self, line):
@@ -38,14 +39,14 @@ class HBNBCommand(cmd.Cmd):
         ]))
 
     def do_create(self, line):
-        '''Creates a new model instance'''
-        args = line.split()
-        if len(args) < 1:
-            print('** class name missing **')
-        elif args[0] not in self.get_model_classes():
-            print('** class doesn\'t exist **')
+        """Creates a new model instance.
+        """
+        if line == "" or line is None:
+            print("** class name missing **")
+        elif line not in storage.classes():
+            print("** class doesn't exist **")
         else:
-            model = self.get_model(args[0])()
+            model = storage.classes()[line]()
             model.save()
             print(model.id)
 
@@ -57,22 +58,23 @@ class HBNBCommand(cmd.Cmd):
         ]))
 
     def do_show(self, line):
-        '''Prints the string representation of an instance
-          based on class name and id'''
-        args = line.split()
-        if len(args) < 1:
-            print('** class name missing **')
-        elif args[0] not in self.get_model_classes():
-            print('** class doesn\'t exist **')
-        elif len(args) < 2:
-            print('** instance id missing **')
+        """Prints the string representation of an instance
+        based on the model class and id
+        """
+        if line == "" or line is None:
+            print("** class name missing **")
         else:
-            key = args[0]+'.'+args[1]
-            model = FileStorage.all(self).get(key)
-            if model is None:
-                print('** no instance found **')
-                return
-            print(model)
+            words = line.split(' ')
+            if words[0] not in storage.classes():
+                print("** class doesn't exist **")
+            elif len(words) < 2:
+                print("** instance id missing **")
+            else:
+                key = "{}.{}".format(words[0], words[1])
+                if key not in storage.all():
+                    print("** no instance found **")
+                else:
+                    print(storage.all()[key])
 
     def help_show(self):
         '''Help for the show command'''
@@ -82,24 +84,23 @@ class HBNBCommand(cmd.Cmd):
             ]))
 
     def do_destroy(self, line):
-        '''Deletes an instance based on the class name id'''
-        args = line.split()
-        if len(args) < 1:
-            print('** class name missing **')
-            return
-        elif args[0] not in self.get_model_classes():
-            print('** class doesn\'t exist **')
-        elif len(args) < 2:
-            print('** instance id missing **')
+        """Deletes an instance based on the class name and id.
+        """
+        if line == "" or line is None:
+            print("** class name missing **")
         else:
-            key = args[0]+'.'+args[1]
-            models = FileStorage.all(self)
-            model = models.get(key)
-            if model is None:
-                print('** no instance found **')
-                return
-            del models[key]
-            FileStorage.save(self)
+            words = line.split(' ')
+            if words[0] not in storage.classes():
+                print("** class doesn't exist **")
+            elif len(words) < 2:
+                print("** instance id missing **")
+            else:
+                key = "{}.{}".format(words[0], words[1])
+                if key not in storage.all():
+                    print("** no instance found **")
+                else:
+                    del storage.all()[key]
+                    storage.save()
 
     def help_destroy(self):
         '''Help for the destroy command'''
@@ -109,25 +110,19 @@ class HBNBCommand(cmd.Cmd):
         ]))
 
     def do_all(self, line):
-        '''prints all string representation of all instances
-          based based/not on the class name'''
-        args = line.split()
-        if len(args) == 1:
-            if args[0] not in self.get_model_classes():
-                print('** class doesn\'t exist **')
+        """Prints all string representation of all instances.
+        """
+        if line != "":
+            scrpts = line.split(' ')
+            if scrpts[0] not in storage.classes():
+                print("** class doesn't exist **")
             else:
-                instances = []
-                models = FileStorage.all(self)
-                for key, value in models.items():
-                    if key.startswith(args[0]):
-                        instances.append(str(value))
-                print(instances)
+                inst = [str(obj) for key, obj in storage.all().items()
+                      if type(obj).__name__ == scrpts[0]]
+                print(inst)
         else:
-            models = FileStorage.all(self)
-            model_values = []
-            for value in models.values():
-                model_values.append(str(value))
-            print(model_values)
+            new_list = [str(obj) for key, obj in storage.all().items()]
+            print(new_list)
 
     def help_all(self):
         '''Help for the all command'''
@@ -137,31 +132,52 @@ class HBNBCommand(cmd.Cmd):
         ]))
 
     def do_update(self, line):
-        '''updates all instances based in the calss name
-          and id by adding or updating attributes'''
-        args = line.split()
-        if len(args) < 1:
-            print('** class name missing **')
-        elif args[0] not in self.get_model_classes():
-            print('** class doesn\'t exist **')
-        elif len (args) < 2:
-            print('** instance id missing **')
+        """Updates an instance based on class name and
+        id by adding or updating attribute.
+        """
+        if line == "" or line is None:
+            print("** class name missing **")
+            return
+
+        regx = r'^(\S+)(?:\s(\S+)(?:\s(\S+)(?:\s((?:"[^"]*")|(?:(\S)+)))?)?)?'
+        match = re.search(regx, line)
+        classname = match.group(1)
+        uid = match.group(2)
+        attribute = match.group(3)
+        value = match.group(4)
+        if not match:
+            print("** class name missing **")
+        elif classname not in storage.classes():
+            print("** class doesn't exist **")
+        elif uid is None:
+            print("** instance id missing **")
         else:
-            key = args[0]+'.'+args[1]
-            models = FileStorage.all(self)
-            model = models.get(key)
-            if model is None:
-                print('** no instance found **')
-                return
-            if len(args) < 3:
-                print('** attribute name missing **')
-                return
-            if len(args) < 4:
-                print('** value missing **')
-                return
-            attribute = args[2]
-            #update the model
-            model.args[2] = args[3]
+            key = "{}.{}".format(classname, uid)
+            if key not in storage.all():
+                print("** no instance found **")
+            elif not attribute:
+                print("** attribute name missing **")
+            elif not value:
+                print("** value missing **")
+            else:
+                disp = None
+                if not re.search('^".*"$', value):
+                    if '.' in value:
+                        disp = float
+                    else:
+                        disp = int
+                else:
+                    value = value.replace('"', '')
+                attributes = storage.attributes()[classname]
+                if attribute in attributes:
+                    value = attributes[attribute](value)
+                elif disp:
+                    try:
+                        value = disp(value)
+                    except ValueError:
+                        pass
+                setattr(storage.all()[key], attribute, value)
+                storage.all()[key].save()
 
     def help_update(self):
         '''Help for the update command'''
