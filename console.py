@@ -6,8 +6,10 @@ from models.base_model import BaseModel
 import json
 import re
 
+
 class HBNBCommand(cmd.Cmd):
     '''Command interpreter entry point'''
+
     prompt = '(hbnb) '
 
     def get_model_classes(self):
@@ -118,7 +120,7 @@ class HBNBCommand(cmd.Cmd):
                 print("** class doesn't exist **")
             else:
                 inst = [str(obj) for key, obj in storage.all().items()
-                      if type(obj).__name__ == scrpts[0]]
+                        if type(obj).__name__ == scrpts[0]]
                 print(inst)
         else:
             new_list = [str(obj) for key, obj in storage.all().items()]
@@ -183,7 +185,8 @@ class HBNBCommand(cmd.Cmd):
         '''Help for the update command'''
         print('\n'.join([
             'update an instance',
-            'Usage: update <class name> <id> <attribute name> <attribute value>'
+            'Usage: update <class name>\
+                    <id> <attribute name> <attribute value>'
         ]))
 
     def do_EOF(self, line):

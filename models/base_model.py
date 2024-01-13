@@ -12,7 +12,6 @@ class BaseModel:
 
     def __init__(self, *args, **kwargs):
         """Initializes instance attribute
-        
         Args:
             *args: Number of arguments
             **kwargs: keyword argument
@@ -38,7 +37,7 @@ class BaseModel:
         """returns string representation"""
 
         return "[{}] ({}) {}".\
-                format(type(self).__name__, self.id, self.__dict__)
+            format(type(self).__name__, self.id, self.__dict__)
 
     def save(self):
         """update public instance attribute to current datetime"""
@@ -47,7 +46,8 @@ class BaseModel:
         storage.save()
 
     def to_dict(self):
-        """returns a dictionary containing all keys/values of __dict__ of the instance"""
+        """returns a dictionary containing all
+        keys/values of __dict__ of the instance"""
 
         obj_dict = self.__dict__.copy()
         obj_dict["__class__"] = type(self).__name__

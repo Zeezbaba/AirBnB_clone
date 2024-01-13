@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""File storage Class"""
+"""FileStorage class storage."""
 import os
 import datetime
 import json
@@ -7,8 +7,7 @@ import json
 
 class FileStorage:
 
-    """data storage and retrieval class"""
-
+    """Data storage and retrieval class"""
     __file_path = "file.json"
     __objects = {}
 
@@ -22,13 +21,14 @@ class FileStorage:
         FileStorage.__objects[key] = obj
 
     def save(self):
-        """serializes __objects to the JSON file"""
+        """ serializes __objects to the JSON file)"""
         with open(FileStorage.__file_path, "w", encoding="utf-8") as files:
-            dic = {key: obj.to_dict() for key, obj in FileStorage.__objects.items()}
+            dic = {k: d.to_dict() for k, d in FileStorage.__objects.items()}
             json.dump(dic, files)
 
     def classes(self):
-        """manage correctly serialization and deserialization of all our new classes"""
+        """manage correctly serialization and
+        deserialization of all our new classes"""
         from models.base_model import BaseModel
         from models.user import User
         from models.state import State
@@ -38,12 +38,12 @@ class FileStorage:
         from models.review import Review
 
         classes = {"BaseModel": BaseModel,
-                "User": User,
-                "State": State,
-                "City": City,
-                "Amenity": Amenity,
-                "Place": Place,
-                "Review": Review}
+                   "User": User,
+                   "State": State,
+                   "City": City,
+                   "Amenity": Amenity,
+                   "Place": Place,
+                   "Review": Review}
         return classes
 
     def reload(self):
@@ -53,44 +53,44 @@ class FileStorage:
         with open(FileStorage.__file_path, "r", encoding="utf-8") as files:
             obj_dict = json.load(files)
             obj_dict = {key: self.classes()[obj["__class__"]](**obj)
-                    for key, obj in obj_dict.items()}
+                        for key, obj in obj_dict.items()}
             # Initialize FileStorage and calls for reload
             FileStorage.__objects = obj_dict
 
     def attributes(self):
         """returns attributes and types"""
         attributes = {
-                "BaseModel":
-                    {"id": str,
-                    "created_at": datetime.datetime,
-                    "updated_at": datetime.datetime},
-                "User":
-                    {"email": str,
-                        "password": str,
-                        "first_name": str,
-                        "last_name": str},
-                "State":
-                    {"name": str},
-                "City":
-                    {"state_id": str,
-                    "name": str},
-                "Amenity":
-                    {"name": str},
-                "Place":
-                    {"city_id": str,
-                    "user_id": str,
-                    "name": str,
-                    "description": str,
-                    "number_rooms": int,
-                    "number_bathrooms": int,
-                    "max_guest": int,
-                    "price_by_night": int,
-                    "latitude": float,
-                    "longitude": float,
-                    "amenity_ids": list},
-                "Review":
-                    {"place_id": str,
-                        "user_id": str,
-                        "text": str}
-                    }
+            "BaseModel":
+                     {"id": str,
+                      "created_at": datetime.datetime,
+                      "updated_at": datetime.datetime},
+            "User":
+                     {"email": str,
+                      "password": str,
+                      "first_name": str,
+                      "last_name": str},
+            "State":
+                     {"name": str},
+            "City":
+                     {"state_id": str,
+                      "name": str},
+            "Amenity":
+                     {"name": str},
+            "Place":
+                     {"city_id": str,
+                      "user_id": str,
+                      "name": str,
+                      "description": str,
+                      "number_rooms": int,
+                      "number_bathrooms": int,
+                      "max_guest": int,
+                      "price_by_night": int,
+                      "latitude": float,
+                      "longitude": float,
+                      "amenity_ids": list},
+            "Review":
+            {"place_id": str,
+                         "user_id": str,
+                         "text": str}
+        }
         return attributes
