@@ -29,7 +29,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_quit(self, line):
         '''Function to handle program exit'''
-        return True
+        exit(0)
 
     def help_quit(self):
         '''Help for the quit command'''
@@ -68,6 +68,8 @@ class HBNBCommand(cmd.Cmd):
                 if not args:
                     continue
                 self.onecmd(line)
+            except EOFError:
+                exit(0)
             except KeyboardInterrupt:
                 break
             except Exception as e:

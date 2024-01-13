@@ -7,7 +7,6 @@ from models import storage
 
 
 class BaseModel:
-
     """Base class where other classes will inherit from"""
 
     def __init__(self, *args, **kwargs):
@@ -54,3 +53,4 @@ class BaseModel:
         obj_dict["created_at"] = obj_dict["created_at"].isoformat()
         obj_dict["updated_at"] = obj_dict["updated_at"].isoformat()
         return obj_dict
+

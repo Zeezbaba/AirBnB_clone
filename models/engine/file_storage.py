@@ -6,8 +6,8 @@ import json
 
 
 class FileStorage:
-
     """Data storage and retrieval class"""
+
     __file_path = "file.json"
     __objects = {}
 
@@ -94,3 +94,4 @@ class FileStorage:
                          "text": str}
         }
         return attributes
+
