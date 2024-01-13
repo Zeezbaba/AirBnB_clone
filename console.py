@@ -2,8 +2,6 @@
 '''Command interpreter'''
 import cmd
 from models import storage
-from models.base_model import BaseModel
-import json
 import re
 
 
@@ -39,6 +37,42 @@ class HBNBCommand(cmd.Cmd):
             'Exit the console',
             'Usage: quit'
         ]))
+
+######
+    def cmdloop(self):
+        '''Overriding the default cmdloop function'''
+        while True:
+            try:
+                line = input(self.prompt)
+                args = line.strip()
+                if is_advanced_command(args):
+                    model, command, id = split_advanced_commands(args)
+
+                    if command == 'count':
+                        instances = [
+                            str(obj) for key, obj in
+                            storage.all().items()
+                            if type(obj).__name__ == model]
+                        print(len(instances))
+                    else:
+                        if command not in \
+                                ["all", "count", "show", "destroy", "update"]:
+                            print("** not a valid command **")
+                            continue
+                        if not id and command != 'all':
+                            print('** instance id missing **')
+                            continue
+                        line = model + " " + id
+                        self.execute_command(command, line)
+                    continue
+                if not args:
+                    continue
+                self.onecmd(line)
+            except KeyboardInterrupt:
+                break
+            except Exception as e:
+                print(e)
+########
 
     def do_create(self, line):
         """Creates a new model instance.
@@ -198,6 +232,40 @@ class HBNBCommand(cmd.Cmd):
         print('\n'.join([
             'Quit the shell',
         ]))
+
+    def emptyline(self):
+        '''empty line'''
+        print()
+
+####
+    def execute_command(self, command, line):
+        '''Executes advanced commands'''
+        command_list = {
+            "show": self.do_show,
+            "all": self.do_all,
+            "destroy": self.do_destroy,
+            "update": self.do_update
+        }
+        return command_list[command](line)
+
+
+def is_advanced_command(line):
+    '''Checks whether command is advanced'''
+    is_advanced = re.search(r'\S+\.\S+$', line)
+    if is_advanced:
+        return True
+    return False
+
+
+def split_advanced_commands(line_args):
+    '''Splits advanced commands into several arguments'''
+    pattern = re.compile(r'(\w+)\.(\w+)\((\S*)\)')
+    args = re.findall(pattern, line_args)
+
+    model, command, id = args[0]
+
+    return model, command, id
+#####
 
 
 if __name__ == '__main__':
