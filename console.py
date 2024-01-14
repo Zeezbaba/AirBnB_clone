@@ -10,23 +10,6 @@ class HBNBCommand(cmd.Cmd):
 
     prompt = '(hbnb) '
 
-    def get_model_classes(self):
-        '''Gets all available models in the filestorage'''
-        model_classes = []
-        for key in storage.classes(self).keys():
-            model_classes.append(key)
-        return model_classes
-
-    def get_model(self, arg):
-        '''Gets model Based on command argument given'''
-        model = storage.classes(self).get(arg)
-        return model
-
-    def get_model_attrs(self, arg):
-        '''Returns the model attributes of model arg'''
-        attributes = storage.attributes.get(arg)
-        return attributes
-
     def do_quit(self, line):
         '''Function to handle program exit'''
         exit(0)
@@ -38,43 +21,27 @@ class HBNBCommand(cmd.Cmd):
             'Usage: quit'
         ]))
 
-######
-    def cmdloop(self):
-        '''Overriding the default cmdloop function'''
-        while True:
-            try:
-                line = input(self.prompt)
-                args = line.strip()
-                if is_advanced_command(args):
-                    model, command, id = split_advanced_commands(args)
-
-                    if command == 'count':
-                        instances = [
-                            str(obj) for key, obj in
-                            storage.all().items()
-                            if type(obj).__name__ == model]
-                        print(len(instances))
-                    else:
-                        if command not in \
-                                ["all", "count", "show", "destroy", "update"]:
-                            print("** not a valid command **")
-                            continue
-                        if not id and command != 'all':
-                            print('** instance id missing **')
-                            continue
-                        line = model + " " + id
-                        self.execute_command(command, line)
-                    continue
-                if not args:
-                    continue
-                self.onecmd(line)
-            except EOFError:
-                exit(0)
-            except KeyboardInterrupt:
-                break
-            except Exception as e:
-                print(e)
-########
+    def default(self, arg):
+        ''''Additional feature for more advanced commands'''
+        if is_advanced_command(arg):
+            model, command, id = split_advanced_commands(arg)
+            if command == 'count':
+                instances = [str(obj) for key, obj in
+                             storage.all().items()
+                             if type(obj).__name__ == model]
+                print(len(instances))
+                return
+            else:
+                if command not in \
+                        ["all", "count", "show", "destroy", "update"]:
+                    print("** not a valid command **")
+                if not id and command != 'all':
+                    print('** instance id missing **')
+                    return
+                id_from_string = id[1:-1]
+                line = model + " " + id_from_string
+                print(line)
+                self.execute_command(command, line)
 
     def do_create(self, line):
         """Creates a new model instance.
