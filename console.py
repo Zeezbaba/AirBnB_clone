@@ -188,8 +188,8 @@ class HBNBCommand(cmd.Cmd):
         '''Help for the update command'''
         print('\n'.join([
             'update an instance',
-            'Usage: update <class name>\
-                    <id> <attribute name> <attribute value>'
+            'Usage: update <class name>' +
+            '<id> <attribute name> <attribute value>'
         ]))
 
     def do_EOF(self, line):
