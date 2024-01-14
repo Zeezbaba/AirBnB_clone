@@ -192,6 +192,28 @@ class HBNBCommand(cmd.Cmd):
             '<id> <attribute name> <attribute value>'
         ]))
 
+    def dict_update(self, classname, uid, s_dict):
+        """for dictionary update."""
+        repd = s_dict.replace("'", '"')
+        dic = json.loads(repd)
+        if not classname:
+            print("** class name missing **")
+        elif classname not in storage.classes():
+            print("** class doesn't exist **")
+        elif uid is None:
+            print("** instance id missing **")
+        else:
+            key = "{}.{}".format(classname, uid)
+            if key not in storage.all():
+                print("** no instance found **")
+            else:
+                attributes = storage.attributes()[classname]
+                for attribute, value in d.items():
+                    if attribute in attributes:
+                        value = attributes[attribute](value)
+                    setattr(storage.all()[key], attribute, value)
+                storage.all()[key].save()
+
     def do_EOF(self, line):
         '''EOF command, exits the shell'''
         return True
