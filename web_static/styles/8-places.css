@@ -40,7 +40,7 @@ div.max_guest,
 div.number_rooms,
 div.number_bathrooms {
     line-height: 140px;
-    width: 103px;
+    width: 100px;
     height: 100px;
     display: inline-block;
     background-position: 50% 5px;
