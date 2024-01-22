@@ -1,5 +1,5 @@
 .places {
-    text-align: center;
+    justify-content: center;
     flex-wrap: wrap;
     display: flex;
 }
