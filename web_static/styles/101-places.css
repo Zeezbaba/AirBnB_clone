@@ -1,8 +1,11 @@
 .places {
     text-align: center;
+    flex-wrap: wrap;
+    display: flex;
 }
 .places h1 {
     font-size: 30px;
+    width: 100%;
     text-align: left;
 }
 article {
@@ -14,6 +17,7 @@ article {
     display: inline-block;
     min-height: 250px;
     vertical-align: top;
+    position: relative;
 }
 article h2 {
     font-size: 30px;
@@ -27,16 +31,17 @@ div.price_by_night {
     height: 60px;
     line-height: 60px;
     font-size: 30px;
-    position: relative;
-    float: right;
-    top: -75px;
+    position: absolute;
+    text-align: center;
+    top: 10px;
+    right: 20px;
 }
 div.information {
     height: 80px;
     border-top: 1px solid #DDDDDD;
     border-bottom: 1px solid #DDDDDD;
     display: flex;
-    justify-content: center
+    justify-content: center;
 }
 div.max_guest,
 div.number_rooms,
@@ -45,8 +50,8 @@ div.number_bathrooms {
     width: 100px;
     height: 100px;
     display: inline-block;
-    background-position: top center;
     justify-content: center;
+    background-position: top center;
     align-items: flex-end;
     background-repeat: no-repeat;
 }
